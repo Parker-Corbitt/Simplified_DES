@@ -2,11 +2,11 @@
  *        @file: simplified_des.cc
  *      @author: Parker Corbitt
  *        @date: October 8, 2023
- *       @brief: The purpose of this program is to perform encryption/decryption 
- *              based on the simplified DES algorithm. All operations (permutations, 
+ *       @brief: The purpose of this program is to perform encryption/decryption
+ *              based on the simplified DES algorithm. All operations (permutations,
  *              keygen, feistel) are done in accordance with this algorithm.
- * 
- * 
+ *
+ *
  *        @todo:    *Verify that the p10 permutations functions as expected
  *                  *Take the key as a command line argument
  */
@@ -21,8 +21,8 @@ using namespace std;
 
 /**
  * @brief Performs operations on the input variable to either encyrpt/decrypt
- *          the input character. 
- * 
+ *          the input character.
+ *
  * @param input - The character to be encrypted
  * @param k1 - The key to be used first within the feistel function
  * @param k2 - the key to be used second within the feistel function
@@ -32,120 +32,208 @@ char feistel(char &input, bitset<8> &k1, bitset<8> &k2);
 
 /**
  * @brief Generates a key based on a 10 bit input supplied by a command line argument
- * 
- * @param input_key - The command line integer converted to a bitset
+ *
+ * @param input_key - The 10 bit command line integer converted to a bitset
  * @param k1 - The first key generated
  * @param k2 - The second key generated
  */
 void keygen(bitset<10> input_key, bitset<8> &k1, bitset<8> &k2);
 
 /**
- * @brief Permutes the input bitset in accordance with the ip permutation
- * 
- * @param input - The character to be enc/dec, converted to a bitset
+ * @brief Permutes the ip permutation on the input bitset
+ *
+ * @param input
  */
 void ip(bitset<8> &input);
 
 /**
- * @brief Permutes the input bitset in accordance with th ip inverse permutation
- * 
- * @param input - The bitset to be converted to the output char
+ * @brief Performs ip inverse permutation on the input bitset
+ *
+ * @param input
  */
 void ip_inv(bitset<8> &input);
 
 /**
- * @brief Performs the expansion permutation
- * 
- * @param input - 
- * @return bitset<8> 
+ * @brief Performs the expansion permutation on the  input bitset
+ *
+ * @param input -
+ * @return bitset<8>
  */
 bitset<8> ep(bitset<4> &input);
+
+/**
+ * @brief Permutes the p4 permutation
+ * 
+ * @param upper What will become the higher order bits before the permutation
+ * @param lower What will become the lower order bits before  the permutation
+ * @return bitset<4> 
+ */
 bitset<4> p4(bitset<2> upper, bitset<2> lower);
+
+/**
+ * @brief Performs the p8 permutation on a combined bitset of upper and lower
+ * 
+ * @param upper - What will become the 5 higher order bits before the permutation
+ * @param lower - What will become the 5 lower order bits before the permutation
+ * @return bitset<8> 
+ */
 bitset<8> p8(bitset<5> upper, bitset<5> lower);
+
+/**
+ * @brief Performs the p10 permutation on the input_key bitset
+ * 
+ * @param input_key - The 10 bit integer converted into a bitset
+ */
 void p10(bitset<10> &input_key);
+
+/**
+ * @brief Performs the S0 substitution on the input bitset
+ * 
+ * @param input
+ * @return bitset<2> The 
+ */
 bitset<2> s0(bitset<4> input);
+
+/**
+ * @brief Performs the S1 substitution on the input bitsett
+ * 
+ * @param input 
+ * @return bitset<2> 
+ */
 bitset<2> s1(bitset<4> input);
+
+/**
+ * @brief Peforms a wrapping bitshift, one order of bits at a time
+ * 
+ * @param bits 
+ * @param shift_amount 
+ */
 void wrapping_shift(bitset<5> &bits, int shift_amount);
 
 int main(int argc, char const *argv[])
 {
+    if (argc != 2)
+    {
+        cerr << "Error: Only run the program using the executable name and a 10 bit key" << endl;
+        return 0;
+    }
 
-    int key = 642;
-    string starting = "bro";
+    int key;
+    string starting;
     string ciphertext;
     string plaintext;
-
+    bitset<10> key_bits;
     bitset<8> k1;
     bitset<8> k2;
-    bitset<10> key_bits = bitset<10>(key);
+
+    // key formation
+    key = stoi(argv[1]);
+    key_bits = bitset<10>(key);
+
+    //taking input for text to be enc/dec
+    getline(cin, starting);
 
     keygen(key_bits, k1, k2);
-    cout << "This is k1: " << k1 << endl;
-    cout << "This is k2: " << k2 << endl;
-    cout << "This is the entered text: " << starting << endl;
-    for (int i = 0; i < starting.size(); i++)
+
+    // cout << "This is k1: " << k1 << endl;
+    // cout << "This is k2: " << k2 << endl;
+    // cout << "This is the entered text: " << starting << endl;
+
+    /**for (int i = 0; i < starting.size(); i++)
     {
         ciphertext += feistel(starting.at(i), k1, k2);
-    }
-    cout << "This is the encrypted text: " << ciphertext << endl;
+    }**/
+
+    //cout << "This is the encrypted text: " << ciphertext << endl;
 
     for (int i = 0; i < starting.size(); i++)
     {
-        plaintext += feistel(ciphertext.at(i), k2, k1);
+        plaintext += feistel(starting.at(i), k2, k1);
     }
-    cout << "This is the decrypted text: " << plaintext << endl;
+    cout << plaintext << endl;
 
     return 0;
 } // main
 
 char feistel(char &input, bitset<8> &k1, bitset<8> &k2)
 {
-    // convert input char to bits
-    bitset<8> input_bits = bitset<8>(input);
-
-    // IP permutation
-    ip(input_bits);
-
-    // Split the ip bits into two ordered halves
+    bitset<8> input_bits;
     bitset<4> upper;
     bitset<4> lower;
-
-    for (int i = 7; i >= 4; i--)
-    {
-        upper[i- 4] = input_bits[i];
-        lower[i - 4] = input_bits[i - 4];
-    }
-    bitset<8> lower_expanded = ep(lower);
-    bitset<8> expanded_xor = lower_expanded ^ k1;
-
+    bitset<8> lower_expanded;
+    bitset<8> expanded_xor;
     bitset<4> post_xor_upper;
     bitset<4> post_xor_lower;
+    bitset<2> post_s0;
+    bitset<2> post_s1;
+    bitset<4> p4_output;
+    bitset<4> last_xor;
+    bitset<8> final;
+
+    // Convert input char to bits
+    input_bits = bitset<8>(input);
+
+    // IP
+    ip(input_bits);
+
+    // Split in half
+    for (int i = 7; i >= 4; i--)
+    {
+        upper[i - 4] = input_bits[i];
+        lower[i - 4] = input_bits[i - 4];
+    }
+
+    // Expansion
+    lower_expanded = ep(lower);
+
+    // Xor
+    expanded_xor = lower_expanded ^ k1;
+
+    // Split in half
     for (int i = 7; i >= 4; i--)
     {
         post_xor_upper[i - 4] = expanded_xor[i];
         post_xor_lower[i - 4] = expanded_xor[i - 4];
     }
-    bitset<2> post_s0 = s0(post_xor_upper);
-    bitset<2> post_s1 = s1(post_xor_lower);
-    bitset<4> p4_output = p4(post_s0, post_s1);
-    bitset<4> last_xor = upper ^ p4_output;
+
+    // S Boxes
+    post_s0 = s0(post_xor_upper);
+    post_s1 = s1(post_xor_lower);
+
+    // P4
+    p4_output = p4(post_s0, post_s1);
+
+    // Xor
+    last_xor = upper ^ p4_output;
+
+    // Swap Nibbles
     upper = lower;
     lower = last_xor;
 
+    // Expansion
     lower_expanded = ep(lower);
+
+    // Xor
     expanded_xor = lower_expanded ^ k2;
 
+    // Split in half
     for (int i = 7; i >= 4; i--)
     {
         post_xor_upper[i - 4] = expanded_xor[i];
         post_xor_lower[i - 4] = expanded_xor[i - 4];
     }
+
+    // S Boxes
     post_s0 = s0(post_xor_upper);
     post_s1 = s1(post_xor_lower);
+
+    // P4
     p4_output = p4(post_s0, post_s1);
+
+    // Xor
     last_xor = upper ^ p4_output;
 
-    bitset<8> final;
+    // Reassemble
     for (int i = 7; i >= 4; i--)
     {
         final[i] = last_xor[i - 4];
@@ -154,33 +242,34 @@ char feistel(char &input, bitset<8> &k1, bitset<8> &k2)
 
     ip_inv(final);
 
-    // cout << final << endl;
+    // convert back to char
     char x = final.to_ulong();
     return x;
 }
 
 void keygen(bitset<10> input_key, bitset<8> &k1, bitset<8> &k2)
 {
-    // cout << input_key << endl;
-    p10(input_key);
     bitset<5> upper;
     bitset<5> lower;
 
+    p10(input_key);
+
+    // Split in half
     for (int i = 9; i >= 5; i--)
     {
         upper[i - 5] = input_key[i];
         lower[i - 5] = input_key[i - 5];
     }
-    // cout << upper << lower << endl;
+
     wrapping_shift(upper, 1);
     wrapping_shift(lower, 1);
-    // cout << upper << lower << endl;
+
     k1 = p8(upper, lower);
-    // cout << k1 << endl;
+
     wrapping_shift(upper, 2);
     wrapping_shift(lower, 2);
+
     k2 = p8(upper, lower);
-    // cout << k2 << endl;
 
     return;
 }
@@ -196,6 +285,8 @@ void ip(bitset<8> &input)
     {
         input[i] = tmp[permutation[i]];
     }
+
+    return;
 }
 
 void ip_inv(bitset<8> &input)
@@ -209,6 +300,8 @@ void ip_inv(bitset<8> &input)
     {
         input[i] = tmp[permutation[i]];
     }
+
+    return;
 }
 
 bitset<8> ep(bitset<4> &input)
@@ -255,21 +348,26 @@ bitset<8> p8(bitset<5> upper, bitset<5> lower)
         tmp[i] = upper[i - 5];
         tmp[i - 5] = lower[i - 5];
     }
+
     for (int i = 7; i >= 0; i--)
     {
         p8_bits[i] = tmp[permutation[i]];
     }
+
     return p8_bits;
 }
 
 void p10(bitset<10> &input_key)
 {
-    int permutation[10] = {4, 2, 1, 9, 0, 6, 3, 8, 5, 7};
     bitset<10> tmp = input_key;
+    int permutation[10] = {4, 2, 1, 9, 0, 6, 3, 8, 5, 7};
+
     for (int i = 9; i >= 0; i--)
     {
         input_key[i] = tmp[permutation[i]];
     }
+
+    return;
 }
 
 bitset<2> s0(bitset<4> input)
@@ -323,10 +421,13 @@ bitset<2> s1(bitset<4> input)
 void wrapping_shift(bitset<5> &bits, int shift_amount)
 {
     int tmp = 0;
+
     for (int i = shift_amount; i > 0; i--)
     {
         tmp = bits[4];
         bits = bits << 1;
         bits[0] = tmp;
     }
+
+    return;
 }
