@@ -63,50 +63,50 @@ bitset<8> ep(bitset<4> &input);
 
 /**
  * @brief Permutes the p4 permutation
- * 
+ *
  * @param upper What will become the higher order bits before the permutation
  * @param lower What will become the lower order bits before  the permutation
- * @return bitset<4> 
+ * @return bitset<4>
  */
 bitset<4> p4(bitset<2> upper, bitset<2> lower);
 
 /**
  * @brief Performs the p8 permutation on a combined bitset of upper and lower
- * 
+ *
  * @param upper - What will become the 5 higher order bits before the permutation
  * @param lower - What will become the 5 lower order bits before the permutation
- * @return bitset<8> 
+ * @return bitset<8>
  */
 bitset<8> p8(bitset<5> upper, bitset<5> lower);
 
 /**
  * @brief Performs the p10 permutation on the input_key bitset
- * 
+ *
  * @param input_key - The 10 bit integer converted into a bitset
  */
 void p10(bitset<10> &input_key);
 
 /**
  * @brief Performs the S0 substitution on the input bitset
- * 
+ *
  * @param input
- * @return bitset<2> The 
+ * @return bitset<2> The
  */
 bitset<2> s0(bitset<4> input);
 
 /**
  * @brief Performs the S1 substitution on the input bitsett
- * 
- * @param input 
- * @return bitset<2> 
+ *
+ * @param input
+ * @return bitset<2>
  */
 bitset<2> s1(bitset<4> input);
 
 /**
  * @brief Peforms a wrapping bitshift, one order of bits at a time
- * 
- * @param bits 
- * @param shift_amount 
+ *
+ * @param bits
+ * @param shift_amount
  */
 void wrapping_shift(bitset<5> &bits, int shift_amount);
 
@@ -130,7 +130,7 @@ int main(int argc, char const *argv[])
     key = stoi(argv[1]);
     key_bits = bitset<10>(key);
 
-    //taking input for text to be enc/dec
+    // taking input for text to be enc/dec
     getline(cin, starting);
 
     keygen(key_bits, k1, k2);
@@ -139,12 +139,18 @@ int main(int argc, char const *argv[])
     // cout << "This is k2: " << k2 << endl;
     // cout << "This is the entered text: " << starting << endl;
 
-    /**for (int i = 0; i < starting.size(); i++)
-    {
-        ciphertext += feistel(starting.at(i), k1, k2);
-    }**/
+    // for (int i = 0; i < starting.size(); i++)
+    // {
+    //     ciphertext += feistel(starting.at(i), k1, k2);
+    // }
 
-    //cout << "This is the encrypted text: " << ciphertext << endl;
+    // cout << "This is the encrypted text: " << ciphertext << endl;
+    // for (int i = 0; i < starting.size(); i++)
+    // {
+    //     plaintext += feistel(ciphertext.at(i), k2, k1);
+    // }
+
+    // cout << "This is the decrypted text: " << plaintext << endl;
 
     for (int i = 0; i < starting.size(); i++)
     {
